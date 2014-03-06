@@ -1,0 +1,2 @@
+debian/casadef.py usr/lib/python2.7/dist-packages/casa
+debian/__init__.py usr/lib/python2.7/dist-packages/casa

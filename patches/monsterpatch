@@ -1,0 +1,367 @@
+Description: monsterpatch that for now contains everything
+
+--- gcwrap-4.2.0.orig/CMakeLists.txt
++++ gcwrap-4.2.0/CMakeLists.txt
+@@ -73,7 +73,7 @@ if( CMAKE_Fortran_COMPILER STREQUAL CMAK
+   message( FATAL_ERROR "Could not find fortran compiler. Please check!" )
+ endif()
+ 
+-casa_always_install()
++#casa_always_install()
+ 
+ #
+ # Build options
+@@ -870,16 +870,10 @@ if ( ${dbusxx} STREQUAL dbus-c++ )
+     set( dbus_depends DBUSXX_ARCH )
+   endif()
+ 
+-  casa_find( DBUSXX
+-    INCLUDES dbus/dbus.h
+-             dbus-c++/dbus.h
+-    INCLUDES_SUFFIXES dbus-1.0 dbus-c++-1
+-    PREFIX_HINTS ${DBUS_ROOT_DIR} ${dbus_prefix}
+-    LIBS dbus-c++-1
+-    PROGRAMS dbusxx-xml2cpp
+-    DEPENDS ${dbus_depends}
+-    IGNORE /usr/lib64/casapy
+-  )
++  include(FindPkgConfig)
++  pkg_search_module(DBUS REQUIRED dbus-c++-1)
++  find_program(dbus-xml-2-cxx NAMES dbusxx-xml2cpp)
++
+   set( dbus-xml-2-cxx ${DBUSXX_dbusxx-xml2cpp_EXECUTABLE} )
+   set( DBUS_INCLUDE_DIRS ${DBUSXX_INCLUDE_DIRS} )
+   set( DBUS_LIBRARIES ${DBUSXX_LIBRARIES} )
+@@ -1007,7 +1001,7 @@ casa_find( QWT
+     ${casa_packages}/qwt-5.2.0
+     ${casa_packages}/qwt-5.2.1-svn
+     ${casa_packages}/qwt-5.2.3-svn
+-  LIBS qwt
++  LIBS qwt-qt4
+   CPP_VERSION QWT_VERSION_STR
+   DEPENDS QT4 )
+ 
+@@ -1095,7 +1089,7 @@ casa_config_end()
+ #
+ # The following variables are substitued into python scripts
+ #
+-set( PYTHON_LIBD ${CMAKE_INSTALL_PREFIX}/python/${PYTHONV} )
++set( PYTHON_LIBD ${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages/casa/ )
+ set( PYTHON_TASKD ${PYTHON_LIBD} )
+ #
+ # allow user to override contents of casadef.py (needed for linux rpms)
+@@ -1209,7 +1203,7 @@ install( FILES
+          install/casa2tlatex.xsl
+          install/casa2tsum.xsl
+          install/casatlist.xsl
+-         DESTINATION ${CMAKE_INSTALL_PREFIX}/xml )
++         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/casa/xml )
+ 
+ install( FILES install/saxon8.jar DESTINATION lib )
+ 
+--- gcwrap-4.2.0.orig/tools/CMakeLists.txt
++++ gcwrap-4.2.0/tools/CMakeLists.txt
+@@ -53,9 +53,8 @@ add_custom_target(
+ 
+ add_dependencies( tools_python_casadef tools_definitions )
+ 
+-add_dependencies( inst tools_python_casadef )
+ add_dependencies( tools_fast tools_python_casadef )
+-install( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/casadef.py DESTINATION python/${PYTHONV} )
++#install( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/casadef.py DESTINATION python/${PYTHONV} )
+ 
+ # Make sure that compile time definitions (build time, svn revision number)
+ # are recomputed in every build.
+@@ -189,18 +188,17 @@ add_custom_target( generated_py SOURCES
+ foreach(_tool ${tools_swig} )
+    get_filename_component( _base ${_tool} NAME_WE )
+    add_dependencies( _${_base} libtools)
+-   add_dependencies( inst  _${_base} )
+    install( TARGETS _${_base}
+-	            DESTINATION python/${PYTHONV}/__casac__ )
++       DESTINATION lib/python2.7/dist-packages/casa/__casac__ )
+ endforeach()
+ 
+-add_dependencies( inst  libtools generated_sources generated_py )
++add_dependencies( libtools generated_sources generated_py )
+ add_dependencies( libtools  generated_sources )
+ add_dependencies( libtools_fast  generated_sources )
+ 
+ foreach(_tool ${tools_py} )
+    get_filename_component( _base ${_tool} NAME_WE )
+    install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${_base}.py
+-	               DESTINATION python/${PYTHONV}/__casac__ )
++	               DESTINATION lib/python2.7/dist-packages/casa/__casac__ )
+ endforeach()
+ 
+--- gcwrap-4.2.0.orig/python/scripts/parallel_go.py
++++ gcwrap-4.2.0/python/scripts/parallel_go.py
+@@ -1,4 +1,4 @@
+-from IPython.kernel import client 
++from IPython.parallel import client 
+ from subprocess import *
+ import os
+ import sys
+--- gcwrap-4.2.0.orig/python/scripts/regressions/CMakeLists.txt
++++ gcwrap-4.2.0/python/scripts/regressions/CMakeLists.txt
+@@ -18,7 +18,7 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #
+ 
+-casa_add_python( tools tools_regressions_python python/${PYTHONV}/regressions
++casa_add_python( tools tools_regressions_python lib/python2.7/dist-packages/casa/regressions
+   3c129_tutorial_regression.py
+   3C219D_regression.py
+   3C391polim_regression.py
+--- gcwrap-4.2.0.orig/python/scripts/regressions/admin/CMakeLists.txt
++++ gcwrap-4.2.0/python/scripts/regressions/admin/CMakeLists.txt
+@@ -18,7 +18,7 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #
+ 
+-casa_add_python( tools tools_regressions_admin_python python/${PYTHONV}
++casa_add_python( tools tools_regressions_admin_python lib/python2.7/dist-packages/casa
+   publish_summary.py
+   runUnitTest.py
+   memTest.py
+@@ -47,4 +47,4 @@ install( PROGRAMS
+          runUnitTest.py
+ 	 execute.py
+          make_mmsdata.py
+-         DESTINATION python/${PYTHONV}/regressions/admin )
++         DESTINATION lib/python${PYTHONV}/dist-packages/casa/regressions/admin )
+--- gcwrap-4.2.0.orig/python/scripts/regressions/tests/CMakeLists.txt
++++ gcwrap-4.2.0/python/scripts/regressions/tests/CMakeLists.txt
+@@ -18,7 +18,7 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #
+ 
+-casa_add_python( tools tools_regressions_tests_python python/${PYTHONV}/regressions/tests
++casa_add_python( tools tools_regressions_tests_python lib/python2.7/dist-packages/casa/regressions/tests
+   3C129.py
+   3C219D_test.py
+   3C391polim.py
+--- gcwrap-4.2.0.orig/python/scripts/usecases/CMakeLists.txt
++++ gcwrap-4.2.0/python/scripts/usecases/CMakeLists.txt
+@@ -18,7 +18,7 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #
+ 
+-casa_add_python( tools tools_usecases_python python/${PYTHONV}/regressions
++casa_add_python( tools tools_usecases_python lib/python2.7/dist-packages/casa/regressions
+   jupiter6cm_usecase.py
+   ngc5921_usecase.py
+   run_polcal_20080224_cband_usecase.py
+--- gcwrap-4.2.0.orig/python/scripts/recipes/CMakeLists.txt
++++ gcwrap-4.2.0/python/scripts/recipes/CMakeLists.txt
+@@ -18,7 +18,7 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #
+ 
+-casa_add_python( tools tools_recipes_python python/${PYTHONV}/recipes
++casa_add_python( tools tools_recipes_python lib/python2.7/dist-packages/casa/recipes
+   almahelpers.py
+   almapolhelpers.py
+   automask.py
+--- gcwrap-4.2.0.orig/python/scripts/recipes/ephemerides/CMakeLists.txt
++++ gcwrap-4.2.0/python/scripts/recipes/ephemerides/CMakeLists.txt
+@@ -18,7 +18,7 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #
+ 
+-casa_add_python( tools tools_ephemerides_python python/${PYTHONV}/recipes/ephemerides
++casa_add_python( tools tools_ephemerides_python lib/python2.7/dist-packages/casa/recipes/ephemerides
+   __init__.py
+   JPLephem_reader.py
+   JPLephem_reader2.py
+--- gcwrap-4.2.0.orig/python/scripts/demos/CMakeLists.txt
++++ gcwrap-4.2.0/python/scripts/demos/CMakeLists.txt
+@@ -18,7 +18,7 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #
+ 
+-casa_add_python( tools tools_demos_python python/${PYTHONV}/regressions
++casa_add_python( tools tools_demos_python lib/python2.7/dist-packages/casa/regressions
+   backend_demo.py
+   jupiter6cm_caldemo.py
+   jupiter6cm_demo.py
+--- gcwrap-4.2.0.orig/python/scripts/tests/CMakeLists.txt
++++ gcwrap-4.2.0/python/scripts/tests/CMakeLists.txt
+@@ -18,7 +18,7 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #
+ 
+-casa_add_python( tools tools_tests_python python/${PYTHONV}/tests
++casa_add_python( tools tools_tests_python lib/python2.7/dist-packages/casa/tests
+   __init__.py
+   test_agentflagger.py
+   test_bandpass.py
+--- gcwrap-4.2.0.orig/python/scripts/parallel/CMakeLists.txt
++++ gcwrap-4.2.0/python/scripts/parallel/CMakeLists.txt
+@@ -24,7 +24,7 @@
+ 
+ 
+ 
+-casa_add_python( tools tools_parallel_python python/${PYTHONV}/parallel
++casa_add_python( tools tools_parallel_python lib/python2.7/dist-packages/casa/parallel
+   parallel_cont.py
+   pimager.py
+   parallel_task_helper.py
+--- gcwrap-4.2.0.orig/apps/casapy/casa
++++ gcwrap-4.2.0/apps/casapy/casa
+@@ -179,12 +179,13 @@ function set_CASA_3RD_PARTY_DIRECTORY {
+             result="$CASA_INSTALLATION_DIRECTORY"
+         else
+             if [ "`uname -p`" = "x86_64" ]; then
+-                result="@casa_packages@"
++                result="/usr/lib64/casapy"
+             else
+                 result="/usr/lib/casapy"
+             fi
+         fi
+     fi
++    result="/usr"
+     readonly CASA_3RD_PARTY_DIRECTORY="$result"
+     ensure_directory_exists "$CASA_3RD_PARTY_DIRECTORY" "CASA_3RD_PARTY_DIRECTORY"
+ }
+@@ -243,14 +244,14 @@ function set_CASAPY_SCRIPT {
+     # Ignore any previous values.
+     local result=""
+     if [ "$CASA_INSTALLATION_TYPE" = "developer-environment" ]; then
+-        result="${CASA_INSTALLATION_DIRECTORY}/python/@python_version@/casapy.py"
++        result="${CASA_INSTALLATION_DIRECTORY}/python/2.7/casapy.py"
+     else
+         case $OS_TYPE in
+         "Darwin")
+             result="${CASA_INSTALLATION_DIRECTORY}/Resources/python/casapy.py"
+             ;;
+         "Linux")
+-            result="${CASA_INSTALLATION_DIRECTORY}/lib/python@python_version@/casapy.py"
++            result="${CASA_INSTALLATION_DIRECTORY}/lib/python2.7/dist-packages/casa/casapy.py"
+             ;;
+         *)
+             exit_with_error_message -1 "Unknown OS: $OS_TYPE"
+@@ -307,10 +308,10 @@ function set_PYTHON_EXECUTABLE {
+     case $OS_TYPE in
+     "Darwin")
+         if [ "$CASA_INSTALLATION_TYPE" = "developer-environment" ]; then
+-            result="${CASA_3RD_PARTY_DIRECTORY}/Library/Frameworks/Python.framework/Versions/@python_version@/Resources/Python.app/Contents/MacOS/Python"
++            result="${CASA_3RD_PARTY_DIRECTORY}/Library/Frameworks/Python.framework/Versions/2.6/Resources/Python.app/Contents/MacOS/Python"
+         else
+             # Probably running from an app.  Not sure though...
+-            result="${CASA_INSTALLATION_DIRECTORY}/Frameworks/Python.framework/Versions/@python_version@/Resources/Python.app/Contents/MacOS/Python"
++            result="${CASA_INSTALLATION_DIRECTORY}/Frameworks/Python.framework/Versions/2.6/Resources/Python.app/Contents/MacOS/Python"
+         fi
+         ;;
+     "Linux")
+--- gcwrap-4.2.0.orig/install/casadef.cmake
++++ gcwrap-4.2.0/install/casadef.cmake
+@@ -83,13 +83,13 @@ set( ENV{LC_TIME} ${_lc_time_old} )
+ set( ENV{LC_MESSAGES} ${_lc_messages_old} )
+ 
+ if( NOT TAGGEDTIME )
+-  message( FATAL_ERROR "Could not read \"Last Changed Date\" from the output of \"svn info ${casadef_source_dir}/VERSION\"" )
++    SET (TAGGEDTIME "Mon, 10 Feb 2014")
+ endif()
+ if( NOT SVNREVISION )
+-  message( FATAL_ERROR "Could not read \"Last Changed Rev\" from the output of \"svn info\"" )
++    set (SVNREVISION "28496")
+ endif()
+ if( NOT SVNURL )
+-  message( FATAL_ERROR "Could not read \"URL\" from the output of \"svn info\"" )
++    set (SVNREURL "https://svn.cv.nrao.edu/svn/casa/branches/release-4_2_0/code")
+ endif()
+ 
+ if( NOT casadef_quiet )
+--- gcwrap-4.2.0.orig/install/target.cmake
++++ gcwrap-4.2.0/install/target.cmake
+@@ -55,7 +55,6 @@ macro( casa_add_library module )
+   add_library( lib${module} ${ARGN} )
+   set_target_properties( lib${module} PROPERTIES OUTPUT_NAME ${module} )
+ 
+-  add_dependencies( inst lib${module} )
+   add_custom_target( lib${module}_fast ${CMAKE_BUILD_TOOL} lib${module}/fast )
+   add_dependencies( ${module}_fast lib${module}_fast )
+ 
+@@ -77,7 +76,6 @@ macro( casa_add_executable module name )
+   set( _sources ${ARGN} )
+ 
+   add_executable( ${name} ${_sources} )
+-  add_dependencies( inst ${name} )
+   add_custom_target( ${name}_fast ${CMAKE_BUILD_TOOL} ${name}/fast )
+   add_dependencies( ${module}_fast ${name}_fast )
+ 
+@@ -274,7 +272,7 @@ endmacro()
+ MACRO( casa_add_python module  _target _install_dir )
+ 
+   install( PROGRAMS ${ARGN}
+-           DESTINATION ${_install_dir} )
++           DESTINATION /usr/lib/python2.7/dist-packages/casa )
+ 
+ endmacro()
+ 
+@@ -294,7 +292,6 @@ macro( casa_add_pymodule name )
+   set( _sources ${ARGN} )
+ 
+   add_library( ${name} MODULE ${_sources} )
+-  add_dependencies( inst ${name} )
+   add_custom_target( ${name}_fast ${CMAKE_BUILD_TOOL} ${name}/fast )
+   add_dependencies( tools_fast ${name}_fast )
+   add_dependencies( tasks_fast ${name}_fast )
+--- gcwrap-4.2.0.orig/install/ui.cmake
++++ gcwrap-4.2.0/install/ui.cmake
+@@ -114,18 +114,17 @@ macro( casa_add_tasks module _target )
+     ALL 
+     DEPENDS ${_out_py} 
+     )
+-  add_dependencies( inst ${_target} )
+   add_custom_target( ${_target}_fast ${CMAKE_BUILD_TOOL} ${_target}/fast )
+   add_dependencies( ${module}_fast ${_target}_fast )
+ 
+   install( 
+     FILES ${_xmls}
+-    DESTINATION ${CMAKE_INSTALL_PREFIX}/xml
++    DESTINATION ${CMAKE_INSTALL_PREFIX}/share/casa/xml
+     )
+ 
+   install( 
+     PROGRAMS ${_out_py}
+-    DESTINATION python/${PYTHONV} 
++    DESTINATION lib/python2.7/dist-packages/casa
+     )
+ 
+   # Create tasksinfo.py
+@@ -158,12 +157,11 @@ macro( casa_add_tasks module _target )
+     )
+ 
+   add_custom_target( tasks ALL DEPENDS ${_tasks} ${_tasksinfo} )
+-  add_dependencies( inst tasks )
+   add_custom_target( tasks_fast ${CMAKE_BUILD_TOOL} tasks/fast )
+   add_dependencies( ${module}_fast tasks_fast )
+ 
+   install(
+-    PROGRAMS ${_tasks} ${_tasksinfo} DESTINATION python/${PYTHONV}
++      PROGRAMS ${_tasks} ${_tasksinfo} DESTINATION lib/python${PYTHONV}/dist-packages/casa
+     )
+ endmacro()
+ 
+@@ -273,7 +271,7 @@ macro( casa_add_tools out_swig out_sourc
+ 				  ${XERCES_LIBRARIES})
+ 			  #install( FILES ${CMAKE_CURRENT_BINARY_DIR}/_${_base}.so
+ 			  #${CMAKE_CURRENT_BINARY_DIR}/${_base}.py
+-			  #DESTINATION python/${PYTHONV}/casac/${_base} )
++			  #DESTINATION lib/python${PYTHONV}/dist-packages/casa/casac/${_base} )
+ 
+     set( _outputs
+ 	    ${_base}_cmpt.h
+@@ -311,8 +309,8 @@ macro( casa_add_tools out_swig out_sourc
+ 
+   set(${out_sources} ${${out_sources}} ${_initpy} )
+   set(${out_sources} ${${out_sources}} ${_casacpy} )
+-  install(FILES ${_initpy} DESTINATION  python/${PYTHONV}/__casac__ )
+-  install(FILES ${_casacpy} DESTINATION python/${PYTHONV} )
++  install(FILES ${_initpy} DESTINATION  lib/python${PYTHONV}/dist-packages/casa/__casac__ )
++  install(FILES ${_casacpy} DESTINATION lib/python${PYTHONV}/dist-packages/casa )
+   
+ endmacro( casa_add_tools )
+ 

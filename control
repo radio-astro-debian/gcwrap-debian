@@ -1,15 +1,20 @@
 Source: gcwrap
-Section: unknown
+Section: science
 Priority: extra
 Maintainer: Gijs Molenaar <gijs@pythonic.nl>
-Build-Depends: debhelper (>= 8.0.0), cmake
-Standards-Version: 3.9.2
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://git.debian.org/collab-maint/gcwrap.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/gcwrap.git;a=summary
+Build-Depends: debhelper (>= 8.0.0), cmake, gfortran, libx11-dev,
+ libfftw3-dev, libcasacasacore-dev, casa, libdbus-c++-dev, libdbus-1-dev,
+ openjdk-6-jre-headless | openjdk-7-jre-headless, libxml2-dev,
+ libxslt1-dev, swig, libqt4-dev, libqwt5-qt4-dev, libxerces-c2-dev,
+ libboost-thread-dev, libboost-filesystem-dev, libboost-program-options-dev,
+ libboost-regex-dev, libreadline-dev, libncurses5-dev, python
+Standards-Version: 3.9.3
+Homepage: https://svn.cv.nrao.edu/svn/casa/trunk/gcwrap/
+X-Python-Version: 2.7
 
 Package: gcwrap
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends},
+ ${perl:Depends}, casa, casacore-data, python-zmq, python-scipy
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
