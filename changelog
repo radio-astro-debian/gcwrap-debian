@@ -1,0 +1,5 @@
+gcwrap (4.2.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Gijs Molenaar <gijs@pythonic.nl>  Thu, 06 Mar 2014 12:07:06 +0200
