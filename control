@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 8.0.0), cmake, gfortran, libx11-dev,
  openjdk-6-jre-headless | openjdk-7-jre-headless, libxml2-dev,
  libxslt1-dev, swig, libqt4-dev, libqwt5-qt4-dev, libxerces-c2-dev,
  libboost-thread-dev, libboost-filesystem-dev, libboost-program-options-dev,
- libboost-regex-dev, libreadline-dev, libncurses5-dev, python
+ libboost-regex-dev, libreadline-dev, libncurses5-dev, python, libcfitsio3-dev
 Standards-Version: 3.9.3
 Homepage: https://svn.cv.nrao.edu/svn/casa/trunk/gcwrap/
 X-Python-Version: 2.7
