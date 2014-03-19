@@ -1,3 +1,15 @@
+gcwrap (4.2.0-4precise1) precise; urgency=low
+
+  * add missing dependencies
+
+ -- Gijs Molenaar <gijs@pythonic.nl>  Wed, 19 Mar 2014 14:29:49 +0200
+
+gcwrap (4.2.0-3precise1) precise; urgency=low
+
+  *  fix some more problems
+
+ -- Gijs Molenaar <gijs@pythonic.nl>  Thu, 06 Mar 2014 18:20:08 +0200
+
 gcwrap (4.2.0-2precise1) precise; urgency=low
 
   * add libcfitsio3-dev dependency 
